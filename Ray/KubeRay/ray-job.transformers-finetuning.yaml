@@ -11,7 +11,9 @@ spec:
       - transformers
       - transformers[torch]
       - datasets
-      - ray[train]
+      - ray[default]
+      - evaluate
+      - scikit-learn
     working_dir: "https://github.com/Vismayak/my-sandbox/archive/master.zip"
     env_vars:
       NUM_WORKERS: "2"

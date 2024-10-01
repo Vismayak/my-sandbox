@@ -29,22 +29,14 @@ def load_data(dataset_name, model_name):
     # Load the tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     
-    # Preprocess function for tokenization and label encoding
+    # Preprocess function for tokenization
     def preprocess(examples):
         # Tokenize text with padding and truncation
-        tokenized = tokenizer(examples["text"], padding="max_length", truncation=True)
-        # Convert labels to integers
-        tokenized["label"] = [int(label) for label in examples["label"]]
-        return tokenized
+        return tokenizer(examples["text"], padding="max_length", truncation=True)
     
     # Preprocess the datasets (train and test)
-    dataset["train"] = dataset["train"].map(preprocess, batched=True, remove_columns=dataset["train"].column_names)
-    dataset["test"] = dataset["test"].map(preprocess, batched=True, remove_columns=dataset["test"].column_names)
-    
-    # Set the format to return PyTorch tensors
-    dataset["train"].set_format("torch")
-    dataset["test"].set_format("torch")
-
+    dataset["train"] = dataset["train"].map(preprocess, batched=True)
+    dataset["test"] = dataset["test"].map(preprocess, batched=True)
     
     # Convert Hugging Face datasets to Ray datasets for distributed processing
     ray_train_ds = ray.data.from_huggingface(dataset["train"])
@@ -67,7 +59,7 @@ def train_func_per_worker(config: Dict):
     
     args = TrainingArguments(
         output_dir="./results",
-        evaluation_strategy="epoch",
+        eval_strategy="epoch",
         save_strategy="epoch",
         logging_strategy="epoch",
         weight_decay=0.01,
@@ -77,7 +69,7 @@ def train_func_per_worker(config: Dict):
         num_train_epochs=config["num_train_epochs"],
         load_best_model_at_end=True,
         metric_for_best_model=config["metric_for_best_model"],
-        max_steps=100, #TODO - calculate max_steps based on dataset size
+        max_steps=100, #TODO -
     )
 
     trainer = transformers.Trainer(

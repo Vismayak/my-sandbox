@@ -21,7 +21,7 @@ from ray.train.torch import TorchTrainer
 def train_func():
     # Datasets
     dataset = load_dataset("yelp_review_full")
-    tokenizer = AutoTokenizer.from_pretrained("bert-base-cased")
+    tokenizer = AutoTokenizer.from_pretrained("huawei-noah/TinyBERT_General_4L_312D"")
 
     def tokenize_function(examples):
         return tokenizer(examples["text"], padding="max_length", truncation=True)
@@ -35,7 +35,7 @@ def train_func():
 
     # Model
     model = AutoModelForSequenceClassification.from_pretrained(
-        "bert-base-cased", num_labels=5
+        "huawei-noah/TinyBERT_General_4L_312D"", num_labels=5
     )
 
     # Evaluation Metrics
@@ -49,7 +49,7 @@ def train_func():
     # Hugging Face Trainer
     training_args = TrainingArguments(
         output_dir="test_trainer",
-        evaluation_strategy="epoch",
+        eval_strategy="epoch",
         save_strategy="epoch",
         report_to="none",
     )
