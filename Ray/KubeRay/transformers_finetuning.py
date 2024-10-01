@@ -29,14 +29,22 @@ def load_data(dataset_name, model_name):
     # Load the tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     
-    # Preprocess function for tokenization
+    # Preprocess function for tokenization and label encoding
     def preprocess(examples):
         # Tokenize text with padding and truncation
-        return tokenizer(examples["text"], padding="max_length", truncation=True)
+        tokenized = tokenizer(examples["text"], padding="max_length", truncation=True)
+        # Convert labels to integers
+        tokenized["label"] = [int(label) for label in examples["label"]]
+        return tokenized
     
     # Preprocess the datasets (train and test)
-    dataset["train"] = dataset["train"].map(preprocess, batched=True)
-    dataset["test"] = dataset["test"].map(preprocess, batched=True)
+    dataset["train"] = dataset["train"].map(preprocess, batched=True, remove_columns=dataset["train"].column_names)
+    dataset["test"] = dataset["test"].map(preprocess, batched=True, remove_columns=dataset["test"].column_names)
+    
+    # Set the format to return PyTorch tensors
+    dataset["train"].set_format("torch")
+    dataset["test"].set_format("torch")
+
     
     # Convert Hugging Face datasets to Ray datasets for distributed processing
     ray_train_ds = ray.data.from_huggingface(dataset["train"])
