@@ -56,9 +56,6 @@ def train_func_per_worker(config: Dict):
 
     train_iterable_ds = train_dataset.iter_torch_batches(batch_size=config["per_device_train_batch_size"])
     eval_iterable_ds = eval_dataset.iter_torch_batches(batch_size=config["per_device_eval_batch_size"])
-
-    # Calculate the number of training steps
-    num_training_steps = (config["dataset_size"] // (config["per_device_train_batch_size"] * config["num_workers"])) * config["num_train_epochs"]
     
     args = TrainingArguments(
         output_dir="./results",
@@ -72,7 +69,7 @@ def train_func_per_worker(config: Dict):
         num_train_epochs=config["num_train_epochs"],
         load_best_model_at_end=True,
         metric_for_best_model=config["metric_for_best_model"],
-        max_steps=num_training_steps,
+        max_steps=100,
     )
 
     trainer = transformers.Trainer(
