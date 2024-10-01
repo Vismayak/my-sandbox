@@ -4,11 +4,12 @@ metadata:
   name: rayjob-transformers-finetuning
 spec:
   shutdownAfterJobFinishes: false
-  entrypoint: python Ray/Kuberay/transformers_finetuning.py
+  entrypoint: python Ray/KubeRay/transformers_finetuning.py
   runtimeEnvYAML: |
     pip:
       - torch
       - transformers
+      - transformers[torch]
       - datasets
       - ray[train]
     working_dir: "https://github.com/Vismayak/my-sandbox/archive/master.zip"
