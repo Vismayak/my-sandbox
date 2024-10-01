@@ -66,6 +66,7 @@ def train_func_per_worker(config: Dict):
         save_strategy="epoch",
         logging_strategy="epoch",
         weight_decay=0.01,
+        learning_rate=2e-5,
         per_device_train_batch_size=config["per_device_train_batch_size"],
         per_device_eval_batch_size=config["per_device_eval_batch_size"],
         num_train_epochs=config["num_train_epochs"],
