@@ -21,10 +21,10 @@ from ray.train.torch import TorchTrainer
 def train_func():
     # Datasets
     dataset = load_dataset("yelp_review_full")
-    tokenizer = AutoTokenizer.from_pretrained("huawei-noah/TinyBERT_General_4L_312D")
+    tokenizer = AutoTokenizer.from_pretrained("prajjwal1/bert-tiny")
 
     def tokenize_function(examples):
-        return tokenizer(examples["text"], padding="max_length", truncation=True, max_length=315)
+        return tokenizer(examples["text"], padding="max_length", truncation=True)
 
     small_train_dataset = (
         dataset["train"].select(range(1000)).map(tokenize_function, batched=True)
@@ -35,7 +35,7 @@ def train_func():
 
     # Model
     model = AutoModelForSequenceClassification.from_pretrained(
-        "huawei-noah/TinyBERT_General_4L_312D", num_labels=5
+        "prajjwal1/bert-tiny", num_labels=5
     )
 
     # Evaluation Metrics
