@@ -5,6 +5,7 @@ Welcome to my sandbox repository. This is a personal space where I explore, expe
 ## Tools & Technologies
 Here are some of the tools and technologies I'm experimenting with:
 - Ray
+- streamlit
 
 ## Structure
 
