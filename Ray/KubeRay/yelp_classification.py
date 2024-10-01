@@ -24,7 +24,7 @@ def train_func():
     tokenizer = AutoTokenizer.from_pretrained("huawei-noah/TinyBERT_General_4L_312D")
 
     def tokenize_function(examples):
-        return tokenizer(examples["text"], padding="max_length", truncation=True)
+        return tokenizer(examples["text"], padding="max_length", truncation=True, max_length=315)
 
     small_train_dataset = (
         dataset["train"].select(range(1000)).map(tokenize_function, batched=True)
@@ -80,7 +80,7 @@ def train_yelp_classification(num_workers=4, cpus_per_worker=2, use_gpu=False):
 
     train_config = {
         "lr": 1e-3,
-        "epochs": 10,
+        "epochs": 3,
         "batch_size_per_worker": global_batch_size // num_workers,
     }
 
