@@ -69,7 +69,7 @@ def train_func_per_worker(config: Dict):
         num_train_epochs=config["num_train_epochs"],
         load_best_model_at_end=True,
         metric_for_best_model=config["metric_for_best_model"],
-        max_steps=100,
+        max_steps=100, #TODO - calculate max_steps based on dataset size
     )
 
     trainer = transformers.Trainer(
