@@ -14,26 +14,34 @@ from ray.train.huggingface.transformers import (
 from ray.train import ScalingConfig
 from ray.train.torch import TorchTrainer
 
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # Load the dataset and preprocess it
 def load_data(dataset_name, model_name):
-    dataset = load_dataset(dataset_name).shuffle()
-    # Limit dataset for quicker training
+    # Load and shuffle the dataset
+    dataset = load_dataset(dataset_name)
+    
+    # Limit dataset size for quicker training
     ds_size = 10000
-    dataset["train"] = dataset["train"].select(range(ds_size))
-    dataset["test"] = dataset["test"].select(range(ds_size))
+    dataset["train"] = dataset["train"].shuffle(seed=42).select(range(ds_size))
+    dataset["test"] = dataset["test"].shuffle(seed=42).select(range(ds_size))
 
+    # Load the tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     
-    # TODO: Preprocess the dataset after converting to Ray Data
-    
+    # Preprocess function for tokenization
     def preprocess(examples):
+        # Tokenize text with padding and truncation
         return tokenizer(examples["text"], padding="max_length", truncation=True)
-
-    dataset = dataset.map(preprocess, batched=True)
-
+    
+    # Preprocess the datasets (train and test)
+    dataset["train"] = dataset["train"].map(preprocess, batched=True)
+    dataset["test"] = dataset["test"].map(preprocess, batched=True)
+    
+    # Convert Hugging Face datasets to Ray datasets for distributed processing
     ray_train_ds = ray.data.from_huggingface(dataset["train"])
     ray_eval_ds = ray.data.from_huggingface(dataset["test"])
+    
     return ray_train_ds, ray_eval_ds
 
 

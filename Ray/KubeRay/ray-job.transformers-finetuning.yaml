@@ -1,0 +1,62 @@
+apiVersion: ray.io/v1
+kind: RayJob
+metadata:
+  name: rayjob-transformers-finetuning
+spec:
+  shutdownAfterJobFinishes: false
+  entrypoint: python Ray/Kuberay/transformers_finetuning.py
+  runtimeEnvYAML: |
+    pip:
+      - torch
+      - transformers
+      - datasets
+      - ray[train]
+    working_dir: "https://github.com/Vismayak/my-sandbox/archive/master.zip"
+    env_vars:
+      NUM_WORKERS: "2"
+      CPUS_PER_WORKER: "2"
+
+  # rayClusterSpec specifies the RayCluster instance to be created by the RayJob controller.
+  rayClusterSpec:
+    rayVersion: '2.9.0'
+    headGroupSpec:
+      rayStartParams: {}
+      # Pod template
+      template:
+        spec:
+          containers:
+            - name: ray-head
+              image: rayproject/ray:2.9.0
+              ports:
+                - containerPort: 6379
+                  name: gcs-server
+                - containerPort: 8265 # Ray dashboard
+                  name: dashboard
+                - containerPort: 10001
+                  name: client
+              resources:
+                limits:
+                  cpu: "2"
+                  memory: "4Gi"
+                requests:
+                  cpu: "2"
+                  memory: "4Gi"
+    workerGroupSpecs:
+      - replicas: 2
+        minReplicas: 1
+        maxReplicas: 3
+        groupName: small-group
+        rayStartParams: {}
+        # Pod template
+        template:
+          spec:
+            containers:
+              - name: ray-worker
+                image: rayproject/ray:2.9.0
+                resources:
+                  limits:
+                    cpu: "3"
+                    memory: "20Gi"
+                  requests:
+                    cpu: "3"
+                    memory: "20Gi"
