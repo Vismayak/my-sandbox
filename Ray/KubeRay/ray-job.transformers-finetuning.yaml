@@ -8,8 +8,9 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  storageClassName: local-storage
+  storageClassName: nfs-taiga
 
+---
 apiVersion: ray.io/v1
 kind: RayJob
 metadata:
@@ -30,13 +31,12 @@ spec:
     env_vars:
       NUM_WORKERS: "2"
       CPUS_PER_WORKER: "2"
+      SHARED_STORAGE_PATH: "/shared" 
 
-  # rayClusterSpec specifies the RayCluster instance to be created by the RayJob controller.
   rayClusterSpec:
     rayVersion: '2.9.0'
     headGroupSpec:
       rayStartParams: {}
-      # Pod template
       template:
         spec:
           containers:
@@ -45,7 +45,7 @@ spec:
               ports:
                 - containerPort: 6379
                   name: gcs-server
-                - containerPort: 8265 # Ray dashboard
+                - containerPort: 8265
                   name: dashboard
                 - containerPort: 10001
                   name: client
@@ -59,17 +59,16 @@ spec:
               volumeMounts:
                 - name: shared-storage
                   mountPath: /shared
-              volumes:
-                - name: shared-storage
-                  persistentVolumeClaim:
-                    claimName: ray-shared-storage
+          volumes:
+            - name: shared-storage
+              persistentVolumeClaim:
+                claimName: ray-shared-storage
     workerGroupSpecs:
       - replicas: 2
         minReplicas: 1
         maxReplicas: 3
         groupName: small-group
         rayStartParams: {}
-        # Pod template
         template:
           spec:
             containers:
@@ -85,7 +84,7 @@ spec:
                 volumeMounts:
                   - name: shared-storage
                     mountPath: /shared
-                volumes:
-                  - name: shared-storage
-                    persistentVolumeClaim:
-                      claimName: ray-shared-storage
+            volumes:
+              - name: shared-storage
+                persistentVolumeClaim:
+                  claimName: ray-shared-storage
