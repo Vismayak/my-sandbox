@@ -29,10 +29,10 @@ def train_func():
         return tokenizer(examples["text"], padding="max_length", truncation=True, max_length=512)
 
     small_train_dataset = (
-        dataset["train"].map(tokenize_function, batched=True)
+        dataset["train"].select(range(20000)).map(tokenize_function, batched=True)
     )
     small_eval_dataset = (
-        dataset["test"].map(tokenize_function, batched=True)
+        dataset["test"].select(range(4000)).map(tokenize_function, batched=True)
     )
 
     # Model
@@ -54,6 +54,7 @@ def train_func():
         eval_strategy="epoch",
         save_strategy="epoch",
         report_to="none",
+        ddp_find_unused_parameters=False,
     )
 
     trainer = Trainer(
@@ -82,7 +83,7 @@ def train_yelp_classification(num_workers=4, cpus_per_worker=2, use_gpu=False):
 
     train_config = {
         "lr": 1e-3,
-        "epochs": 5,
+        "epochs": 3,
         "batch_size_per_worker": global_batch_size // num_workers,
     }
 
