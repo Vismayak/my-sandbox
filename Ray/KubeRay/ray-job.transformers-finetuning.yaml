@@ -1,3 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ray-shared-storage
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: local-storage
+
 apiVersion: ray.io/v1
 kind: RayJob
 metadata:
@@ -44,6 +56,13 @@ spec:
                 requests:
                   cpu: "2"
                   memory: "4Gi"
+              volumeMounts:
+                - name: shared-storage
+                  mountPath: /shared
+              volumes:
+                - name: shared-storage
+                  persistentVolumeClaim:
+                    claimName: ray-shared-storage
     workerGroupSpecs:
       - replicas: 2
         minReplicas: 1
@@ -63,3 +82,10 @@ spec:
                   requests:
                     cpu: "3"
                     memory: "20Gi"
+                volumeMounts:
+                  - name: shared-storage
+                    mountPath: /shared
+                volumes:
+                  - name: shared-storage
+                    persistentVolumeClaim:
+                      claimName: ray-shared-storage

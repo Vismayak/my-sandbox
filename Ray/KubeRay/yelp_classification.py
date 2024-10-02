@@ -12,6 +12,7 @@ from transformers import (
 
 import ray.train.huggingface.transformers
 from ray.train import ScalingConfig
+from ray.train import RunConfig
 from ray.train.torch import TorchTrainer
 
 
@@ -49,7 +50,7 @@ def train_func():
 
     # Hugging Face Trainer
     training_args = TrainingArguments(
-        output_dir="test_trainer",
+        output_dir="/shared/test_trainer",
         eval_strategy="epoch",
         save_strategy="epoch",
         report_to="none",
@@ -92,11 +93,13 @@ def train_yelp_classification(num_workers=4, cpus_per_worker=2, use_gpu=False):
         resources_per_worker={"CPU": cpus_per_worker}
     )
 
+    run_config = RunConfig(storage_path="/shared/ray_results")
     # Initialize a Ray TorchTrainer
     trainer = TorchTrainer(
         train_loop_per_worker=train_func,
         train_loop_config=train_config,
         scaling_config=scaling_config,
+        run_config=run_config
     )
 
     # [4] Start distributed training
